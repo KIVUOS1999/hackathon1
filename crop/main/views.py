@@ -20,5 +20,8 @@ def desease(request, pk):
 
 def search(request):
     query = request.GET['quary']
-    res = Desease.objects.filter(desease_name__icontains=query)
-    return render(request, "main/search.html", {"found_desease":res})
+    res = Desease.objects.filter(
+        Q(desease_name__icontains=query) | 
+        Q(desease_description__icontains=query)
+    )
+    return render(request, "main/search.html", {"found_desease":list(set(res))})
