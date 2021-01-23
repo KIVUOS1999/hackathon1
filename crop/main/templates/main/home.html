@@ -1,0 +1,7 @@
+{% extends 'main/header.html' %}
+
+{% block data %}
+    {% for i in desease %}
+        <p><a href="{% url 'desease' i.id %}">{{ i.desease_name | safe}}</a></p>
+    {% endfor %}
+{% endblock %}
