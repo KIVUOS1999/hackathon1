@@ -2,6 +2,10 @@
 
 {% block data %}
     {% for i in desease %}
+        <p><img class = "logo" src="{{i.desease_display_image.url}}"></p>
         <p><a href="{% url 'desease' i.id %}">{{ i.desease_name | safe}}</a></p>
+        <p>{{i.desease_description|slice:":100"|safe}}</p>
+        <hr>
+        <br>
     {% endfor %}
 {% endblock %}
