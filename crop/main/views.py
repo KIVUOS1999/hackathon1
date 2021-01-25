@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .models import Desease
 from django.db.models import Q
+from googletrans import Translator
 
 def homepage(request):
     return render(
@@ -20,6 +21,7 @@ def desease(request, pk):
 
 def search(request):
     query = request.GET['quary']
+    query = Translator(service_urls=['translate.googleapis.com']).translate(text=query, dest='en').text
     res = Desease.objects.filter(
         Q(desease_name__icontains=query) | 
         Q(desease_description__icontains=query)
