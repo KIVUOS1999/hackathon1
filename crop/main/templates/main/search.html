@@ -4,8 +4,8 @@
     <h1>Search result</h1>
 
     {% for i in found_desease %}
-        <p><a href="{% url 'desease' i.id %}">{{i.desease_name}}</a></p>
-        <p>{{i.desease_description|slice:":100"|safe}}</p>
+        <p><a href="{% url 'desease' i.id %}">{{i.Disease_name}}</a></p>
+        <p>{{i.Disease_description|slice:":100"|safe}}</p>
     {% endfor %}
 
 {% endblock %}

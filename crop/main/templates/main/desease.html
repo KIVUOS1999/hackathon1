@@ -1,8 +1,9 @@
 {% extends 'main/header.html' %}
 
 {% block data %}
-    <p><h2>Name</h2>{{ desease.desease_name | safe}}</p>
-    <p><h2>Description</h2>{{ desease.desease_description |safe }}</p>
-    <p><h2>Remidies</h2>{{ desease.desease_remidies |safe}}</p>
+    <p><h2>Name</h2>{{ desease.Disease_name | safe}}</p>
+    <p><h2>Description</h2>{{ desease.Disease_description |safe }}</p>
+    <p><h2>Symptoms</h2>{{desease.Disease_symptoms|safe}}</p>
+    <p><h2>Remidies</h2>{{ desease.Disease_remidies |safe}}</p>
 
-{% endblock %}
+{% endblock %

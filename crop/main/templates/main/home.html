@@ -2,10 +2,12 @@
 
 {% block data %}
     {% for i in desease %}
-        <p><img class = "logo" src="{{i.desease_display_image.url}}"></p>
-        <p><a href="{% url 'desease' i.id %}">{{ i.desease_name | safe}}</a></p>
-        <p>{{i.desease_description|slice:":100"|safe}}</p>
-        <hr>
-        <br>
+
+        {% if i.Disease_healthy_picture %}
+            <p><img src="{{ i.Disease_healthy_picture.url }}" alt=""></p>
+        {% endif %}
+        <p><a href="{% url 'desease' i.id %}">{{i.Disease_name}}</a></p>
+        
+        <p>{{i.Disease_description|slice:":100"|safe}}</p>
     {% endfor %}
 {% endblock %}

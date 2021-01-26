@@ -1,11 +1,15 @@
 from django.db import models
 
 class Desease(models.Model):
-    desease_name = models.CharField(max_length = 200)
-    desease_display_image = models.ImageField(null = True, blank = True)
-    desease_description = models.TextField()
-    desease_remidies = models.TextField()
+    Disease_name = models.CharField(max_length = 200)
+    Disease_description = models.TextField()
+    
+    Disease_healthy_picture = models.ImageField(null = True, blank = True)
+    Disease_unhealthy_picture = models.ImageField(null = True, blank = True)
+    
+    Disease_symptoms = models.TextField()
+    Disease_remidies = models.TextField()
 
 
     def __str__(self):
-        return self.desease_name
+        return self.Disease_name
