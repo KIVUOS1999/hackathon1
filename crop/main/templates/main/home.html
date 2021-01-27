@@ -1,27 +1,24 @@
 {% extends 'main/header.html' %}
 
 {% block data %}
-    <div class="row">
+<div class="row">
         {% for i in desease %}
-            <div class="col s10 m6" style="max-width: 50%; float: left;">
-                <div class="card">
-                    <div class="card-image waves-effect waves-block waves-light">
-                        {% if i.Disease_healthy_picture %}
-                            <img class="activator" src="{{ i.Disease_healthy_picture.url }}">
-                        {% endif %}
-                    </div>
-                    <div class="card-content">
-                        <span class="card-title activator grey-text text-darken-4">{{i.Disease_name}}<i class="material-icons right">more_vert</i></span>              
-                    </div>
-                    <div class="card-action">
-                        <p><a href="{% url 'desease' i.id %}">Visit</a></p>
-                    </div>
-                    <div class="card-reveal">
-                        <span class="card-title grey-text text-darken-4" style="font-size: 80%";>{{i.Disease_name}}<i class=" material-icons right">close</i></span>
-                        <p style="font-size: 70%;">{{i.Disease_description|slice:":100"|safe}}</p>
-                    </div>
+        <div class="col s12 m12 l4">
+            <div class="card">
+                <div class="card-image">
+                    {% if i.Disease_healthy_picture %}
+                        <img src="{{ i.Disease_unhealthy_picture.url }}">
+                    {% endif %}
+                    <span class="card-title">{{i.Disease_name}}</span>
+                </div>
+                <div class="card-content" style = "max-height: 100px; overflow: hidden;">
+                    <p  style="font-size: 70%;">{{i.Disease_description|safe}}</p>
+                </div>
+                <div class="card-action">
+                    <a href="{% url 'desease' i.id %}">Visit</a>
                 </div>
             </div>
-            {% endfor %}
         </div>
+        {% endfor %}
+</div>
 {% endblock %}

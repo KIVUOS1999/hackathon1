@@ -3,6 +3,8 @@
 {% block data %}
     <p><h2>Name</h2>{{ desease.Disease_name | safe}}</p>
     <p><h2>Description</h2>{{ desease.Disease_description |safe }}</p>
+    <img src="{{ desease.Disease_unhealthy_picture.url }}">
+    <img src="{{ desease.Disease_healthy_picture.url }}">
     <p><h2>Symptoms</h2>{{desease.Disease_symptoms|safe}}</p>
     <p><h2>Remidies</h2>{{ desease.Disease_remidies |safe}}</p>
 {% endblock %}

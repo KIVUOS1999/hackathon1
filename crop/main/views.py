@@ -24,6 +24,8 @@ def search(request):
     query = Translator(service_urls=['translate.googleapis.com']).translate(text=query, dest='en').text
     res = Desease.objects.filter(
         Q(Disease_name__icontains=query) | 
-        Q(Disease_description__icontains=query)
+        Q(Disease_description__icontains=query) |
+        Q(Disease_symptoms__icontains=query) |
+        Q(Disease_remidies__icontains=query) 
     )
     return render(request, "main/search.html", {"found_desease":list(set(res)), "query":query})
