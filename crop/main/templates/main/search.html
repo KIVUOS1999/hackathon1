@@ -2,10 +2,19 @@
 
 {% block data %}
     <h1>Search result</h1>
-
     {% for i in found_desease %}
         <p><a href="{% url 'desease' i.id %}">{{i.Disease_name}}</a></p>
         <p>{{i.Disease_description|slice:":100"|safe}}</p>
     {% endfor %}
-
+    {% if found_desease|length < 1 %}
+        <br>
+        <p>No search results</p>
+        <p>Your search query: <b>{{query}}</b> - did not match any documents.</p>
+        <p>Suggestions: </p>
+        <ul>
+            <li>Make sure that all words are spelled correctly.</li>
+            <li>Try different keywords.</li>
+            <li>Try more general keywords.</li>
+        </ul>
+    {% endif %}
 {% endblock %}

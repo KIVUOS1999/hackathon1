@@ -26,4 +26,4 @@ def search(request):
         Q(Disease_name__icontains=query) | 
         Q(Disease_description__icontains=query)
     )
-    return render(request, "main/search.html", {"found_desease":list(set(res))})
+    return render(request, "main/search.html", {"found_desease":list(set(res)), "query":query})
