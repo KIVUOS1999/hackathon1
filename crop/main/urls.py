@@ -10,6 +10,7 @@ urlpatterns = [
     path('desease/<str:pk>', views.desease, name = "desease"),
     path('search/', views.search, name = "search"),
     path('voiceSearch/', views.voice_search, name="search"),
+    path('about/', views.about, name="about"),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
