@@ -1,10 +1,10 @@
 {% extends 'main/header.html' %}
 
 {% block data %}
-    <h1>Search result</h1>
+    <h3>Search result for <b>{{query}}</b></h3>
     {% for i in found_desease %}
         <p><a href="{% url 'desease' i.id %}">{{i.Disease_name}}</a></p>
-        <p>{{i.Disease_description|slice:":100"|safe}}</p>
+        <!--<p>{{i.Disease_description|slice:":100"|safe}}</p>-->
     {% endfor %}
     {% if found_desease|length < 1 %}
         <br>
