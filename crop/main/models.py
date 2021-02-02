@@ -13,3 +13,6 @@ class Desease(models.Model):
 
     def __str__(self):
         return self.Disease_name
+
+class imageSearch(models.Model):
+    uploaded_image = models.ImageField()

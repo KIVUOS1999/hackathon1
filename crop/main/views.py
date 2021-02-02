@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Desease
+from .models import Desease, imageSearch
 from django.db.models import Q
 from googletrans import Translator
 import speech_recognition as sr
@@ -7,17 +7,22 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import cloudscraper
 import html5lib
-
+import numpy as np
+import cv2
+import tensorflow as tf
+from tensorflow import keras
+import os
+from django.conf import settings
 
 useless_words = [
-        "About","Above","According to","Across","After","Against","Ahead of","Along","Amidst","Among","Amongst","Apart from",
-        "Around","As","As far as","As well as","Aside from","At","Barring","Because of","Before","Behind","Below","Beneath","Beside","Besides","Between",
-        "Beyond","By","By means of","Circa","Concerning","Despite","Down","Due to","During","In","In accordance with","In addition to","In case of",
-        "In front of","In lieu of","In place of","In spite of","In to","Inside","Instead of","Into","Except","Except for","Excluding","For","Following",
-        "From","Like","Minus","Near","Next","Next to","Past","Per","Prior to","Round","Since","Off","On","On account of","On behalf of","On to",
-        "On top of","Onto","Opposite","Out","Out from","Out of","Outside","Over","Owing to","Plus","Than","Through","Throughout","Till","Times",
-        "To","Toward","Towards","Under","Underneath","Unlike","Until","Unto","Up","Upon","Via","With","With a view to","Within","Without","a","an","the",
-    ]
+    "About","Above","According to","Across","After","Against","Ahead of","Along","Amidst","Among","Amongst","Apart from",
+    "Around","As","As far as","As well as","Aside from","At","Barring","Because of","Before","Behind","Below","Beneath","Beside","Besides","Between",
+    "Beyond","By","By means of","Circa","Concerning","Despite","Down","Due to","During","In","In accordance with","In addition to","In case of",
+    "In front of","In lieu of","In place of","In spite of","In to","Inside","Instead of","Into","Except","Except for","Excluding","For","Following",
+    "From","Like","Minus","Near","Next","Next to","Past","Per","Prior to","Round","Since","Off","On","On account of","On behalf of","On to",
+    "On top of","Onto","Opposite","Out","Out from","Out of","Outside","Over","Owing to","Plus","Than","Through","Throughout","Till","Times",
+    "To","Toward","Towards","Under","Underneath","Unlike","Until","Unto","Up","Upon","Via","With","With a view to","Within","Without","a","an","the",
+]
 
 def homepage(request):
     return render(
@@ -106,6 +111,92 @@ def desease_scrap(request, pk):
     store = request.session['passing']
     out = urlOpener_scrapper(store[int(pk)])
     return render(request, "main/scrap_out.html", {"out": out})
+
+def camera_search(request):
+    p = request.FILES.get('image')
+    res = []
+    query = ""
+    if(p != None):
+        img_search = imageSearch(uploaded_image = p)
+        p._set_name("test.jpg")
+        if os.path.exists(os.path.join(settings.BASE_DIR, "static/images/test.jpg")):
+            os.remove(os.path.join(settings.BASE_DIR, "static/images/test.jpg"))
+        name_of_doc = p._get_name()
+        img_search.save()
+        query = disease_identifier(name_of_doc)
+        search_scrapper_res, ob = search_scrapper(query)
+        request.session['passing'] = ob
+
+        query = query.split()
+        
+        for i in query:
+            if(i not in useless_words):
+                res+=list(Desease.objects.filter
+                (
+                    Q(Disease_name__icontains=i) | 
+                    Q(Disease_description__icontains=i) |
+                    Q(Disease_symptoms__icontains=i) |
+                    Q(Disease_remidies__icontains=i) 
+                ))
+        res = list(set(res))
+
+    
+    if(request.POST):
+        return render(request, "main/search.html", {"found_desease":res, "query":query,"found_scrap": search_scrapper_res})
+    else:
+        return render (request, "main/camera_search.html")
+
+def disease_identifier(inp):
+    CATAGORIES = [
+        'Apple___Apple_scab',
+        'Apple___Black_rot',
+        'Apple___Cedar_apple_rust',
+        'Apple___healthy',
+        'Blueberry___healthy',
+        'Cherry_(including_sour)___healthy',
+        'Cherry_(including_sour)___Powdery_mildew',
+        'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot',
+        'Corn_(maize)___Common_rust_',
+        'Corn_(maize)___healthy',
+        'Corn_(maize)___Northern_Leaf_Blight',
+        'Grape___Black_rot',
+        'Grape___Esca_(Black_Measles)',
+        'Grape___healthy',
+        'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)',
+        'Orange___Haunglongbing_(Citrus_greening)',
+        'Peach___Bacterial_spot',
+        'Peach___healthy',
+        'Pepper,_bell___Bacterial_spot',
+        'Pepper,_bell___healthy',
+        'Potato___Early_blight',
+        'Potato___healthy',
+        'Potato___Late_blight',
+        'Raspberry___healthy',
+        'Soybean___healthy',
+        'Squash___Powdery_mildew',
+        'Strawberry___healthy',
+        'Strawberry___Leaf_scorch',
+        'Tomato___Bacterial_spot',
+        'Tomato___Early_blight',
+        'Tomato___healthy',
+        'Tomato___Late_blight',
+        'Tomato___Leaf_Mold',
+        'Tomato___Septoria_leaf_spot',
+        'Tomato___Spider_mites Two-spotted_spider_mite',
+        'Tomato___Target_Spot',
+        'Tomato___Tomato_mosaic_virus',
+        'Tomato___Tomato_Yellow_Leaf_Curl_Virus'
+    ]
+    model = keras.models.load_model(os.path.join(settings.BASE_DIR,'trainned_desease.model'))
+    DATA = os.path.join(settings.BASE_DIR,"static/images/"+inp)
+    img_arr = cv2.imread(DATA, cv2.COLOR_BGR2HSV)
+    new_arr = cv2.resize(img_arr, (250, 250))
+    new_arr = np.array(new_arr).reshape(-1, 250, 250, 3)
+    predicted = np.argmax(model.predict(new_arr))
+    output = CATAGORIES[predicted]
+    removed__ = " ".join(output.split("__"))
+    removed_ = " ".join(output.split("_"))
+    return(removed_)
 
 def search_scrapper(inp):
     store = []
