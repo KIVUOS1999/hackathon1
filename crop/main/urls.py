@@ -14,6 +14,9 @@ urlpatterns = [
     path('scrap_desease/<str:pk>', views.desease_scrap, name="desease_scrap"),
     path('camera_search/', views.camera_search, name="camera_search"),
     path('camera_search/camera_search', views.camera_search, name="camera_search"),
+    path('register/', views.register, name="register"),
+    path('login/', views.loginpage, name='login'),
+    path('logout/', views.logout_request, name="logout"),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

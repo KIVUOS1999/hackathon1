@@ -30,6 +30,13 @@
                 </form></li>
                 <li><a onclick="M.toast({html: 'Speak'})" href="/voiceSearch/"><span class="material-icons">mic</span></a></li>
                 <li><a href="/camera_search"><span class = "material-icons">camera</span></a></li>
+                {% if user.is_authenticated %}
+                    <li>Hi! {{user.username}}</li>
+                    <li><a href="/logout">Logout</a></li>
+                {% else %}
+                    <li><a href="/register"><span class="material-icons">account_circle</span>Register</a></li>
+                {% endif %}
+                
             </ul>
         </div>
     </nav>
@@ -45,6 +52,12 @@
                     <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="quary">
                 </li>
             </form>
+            {% if user.is_authenticated %}
+                    <li>Hi! {{user.username}}</li>
+                    <li><a href="/logout">Logout</a></li>
+            {% else %}
+                <li><a href="/register"><span class="material-icons">account_circle</span>Register</a></li>
+            {% endif %}
             <font face="Times New Roman"><li><a href="/"><b>Home</b></a></li></font>
             <font face="Times New Roman"><li><a href="/about"><b>About us</b></a></li></font>
         </ul>

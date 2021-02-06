@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Desease, imageSearch
 from django.db.models import Q
 from googletrans import Translator
@@ -13,6 +13,9 @@ import tensorflow as tf
 from tensorflow import keras
 import os
 from django.conf import settings
+from django.contrib.auth.forms import UserCreationForm
+from .form import CreateUserFrom
+from django.contrib.auth import authenticate, login, logout
 
 useless_words = [
     "About","Above","According to","Across","After","Against","Ahead of","Along","Amidst","Among","Amongst","Apart from",
@@ -23,6 +26,7 @@ useless_words = [
     "On top of","Onto","Opposite","Out","Out from","Out of","Outside","Over","Owing to","Plus","Than","Through","Throughout","Till","Times",
     "To","Toward","Towards","Under","Underneath","Unlike","Until","Unto","Up","Upon","Via","With","With a view to","Within","Without","a","an","the",
 ]
+model = keras.models.load_model(os.path.join(settings.BASE_DIR,'trainned_desease.model'))
 
 def homepage(request):
     return render(
@@ -51,20 +55,13 @@ def search(request):
     
     search_scrapper_res, ob = search_scrapper(query)
     request.session['passing'] = ob
-
-    query = query.split()
-    res = []
     
-    for i in query:
-        if(i not in useless_words):
-            res+=list(Desease.objects.filter
-            (
-                Q(Disease_name__icontains=i) | 
-                Q(Disease_description__icontains=i) |
-                Q(Disease_symptoms__icontains=i) |
-                Q(Disease_remidies__icontains=i) 
-            ))
-    res = list(set(res))
+    res = list(set(Desease.objects.filter(
+        Q(Disease_name__icontains=query) | 
+        Q(Disease_description__icontains=query) |
+        Q(Disease_symptoms__icontains=query) |
+        Q(Disease_remidies__icontains=query) 
+    )))
 
     if(this_language != 'en'):
         for i in res:
@@ -127,24 +124,45 @@ def camera_search(request):
         search_scrapper_res, ob = search_scrapper(query)
         request.session['passing'] = ob
 
-        query = query.split()
-        
-        for i in query:
-            if(i not in useless_words):
-                res+=list(Desease.objects.filter
-                (
-                    Q(Disease_name__icontains=i) | 
-                    Q(Disease_description__icontains=i) |
-                    Q(Disease_symptoms__icontains=i) |
-                    Q(Disease_remidies__icontains=i) 
-                ))
-        res = list(set(res))
+        res = list(set(Desease.objects.filter(
+        Q(Disease_name__icontains=query) | 
+        Q(Disease_description__icontains=query) |
+        Q(Disease_symptoms__icontains=query) |
+        Q(Disease_remidies__icontains=query) 
+    )))
 
     
     if(request.POST):
         return render(request, "main/search.html", {"found_desease":res, "query":query,"found_scrap": search_scrapper_res})
     else:
         return render (request, "main/camera_search.html")
+
+def register(request):
+    form = CreateUserFrom()
+
+    if request.method == "POST":
+        form = CreateUserFrom(request.POST)
+        if(form.is_valid()):
+            form.save()
+            return redirect("homepage")
+
+    return render(request, "main/register.html", {'form':form})
+
+def loginpage(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('homepage')
+
+    return render(request, "main/login.html")
+
+def logout_request(request):
+    logout(request)
+    return redirect('homepage')
 
 def disease_identifier(inp):
     CATAGORIES = [
@@ -187,7 +205,7 @@ def disease_identifier(inp):
         'Tomato___Tomato_mosaic_virus',
         'Tomato___Tomato_Yellow_Leaf_Curl_Virus'
     ]
-    model = keras.models.load_model(os.path.join(settings.BASE_DIR,'trainned_desease.model'))
+    
     DATA = os.path.join(settings.BASE_DIR,"static/images/"+inp)
     img_arr = cv2.imread(DATA, cv2.COLOR_BGR2HSV)
     new_arr = cv2.resize(img_arr, (250, 250))
