@@ -14,8 +14,9 @@ from tensorflow import keras
 import os
 from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
-from .form import CreateUserFrom
+from .form import CreateUserFrom, DiseaseForm
 from django.contrib.auth import authenticate, login, logout
+from .decorator import  unauthenticated_user, allowed_user
 
 useless_words = [
     "About","Above","According to","Across","After","Against","Ahead of","Along","Amidst","Among","Amongst","Apart from",
@@ -28,6 +29,7 @@ useless_words = [
 ]
 model = keras.models.load_model(os.path.join(settings.BASE_DIR,'trainned_desease.model'))
 
+@allowed_user(allowed_roles = ['admin'])
 def homepage(request):
     return render(
         request, 
@@ -44,6 +46,7 @@ def desease(request, pk):
         {"desease": d}
     )
 
+#searcing logic
 def search(request):
     query = request.GET['quary']
 
@@ -137,7 +140,11 @@ def camera_search(request):
     else:
         return render (request, "main/camera_search.html")
 
+
+#login logic
 def register(request):
+    if request.user.is_authenticated:
+        return redirect("homepage")
     form = CreateUserFrom()
 
     if request.method == "POST":
@@ -148,6 +155,7 @@ def register(request):
 
     return render(request, "main/register.html", {'form':form})
 
+@unauthenticated_user
 def loginpage(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -164,6 +172,8 @@ def logout_request(request):
     logout(request)
     return redirect('homepage')
 
+
+#ml_logic
 def disease_identifier(inp):
     CATAGORIES = [
         'Apple___Apple_scab',
@@ -216,6 +226,8 @@ def disease_identifier(inp):
     removed_ = " ".join(output.split("_"))
     return(removed_)
 
+
+#scrapping logic
 def search_scrapper(inp):
     store = []
     user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
@@ -289,3 +301,38 @@ def urlOpener_scrapper(url):
         output[heading] = sub_out
     return output
     
+
+
+@allowed_user(allowed_roles = ['admin'])
+def update_database(request):
+    form = DiseaseForm()
+    if request.method == "POST":
+        form = DiseaseForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("homepage")
+    return render(request, "main/update_database.html", {'form':form})
+
+@allowed_user(allowed_roles = ['admin'])
+def change_database(request, pk):
+    disease = Desease.objects.get(id = pk)
+    form = DiseaseForm(instance=disease)
+    if request.method == "POST":
+        form = DiseaseForm(request.POST, instance=disease)
+        if form.is_valid():
+            form.save()
+            return redirect("homepage")
+    return render(request, "main/update_database.html", {'form':form})
+
+@allowed_user(allowed_roles = ['admin'])
+def delete_database(request, pk):
+    disease = Desease.objects.get(id = pk)
+    if request.method == "POST":
+        disease.delete()
+        return redirect("homepage")
+
+    return render(request, "main/delete_confirmation.html", {'disease':disease, "pk":pk})
+
+
+def user_page(request):
+    return render(request, "main/user.html", {"desease":Desease.objects.all})

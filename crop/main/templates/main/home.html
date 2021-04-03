@@ -16,6 +16,8 @@
                 </div>
                 <div class="card-action" style = "height: 10%;">
                     <a href="{% url 'desease' i.id %}">View More</a>
+                    <a href="{% url 'change_database' i.id %}">Update</a>
+                    <a href="{% url 'delete_database' i.id %}" style="color: red;">Delete</a> 
                 </div>
             </div>
         </div>
